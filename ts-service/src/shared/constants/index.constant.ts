@@ -19,7 +19,7 @@ export const PUBLIC_KEY = 'publicKey';
 
 export const AXIOS_INSTANCE_TOKEN = 'AXIOS_INSTANCE_TOKEN';
 
-export const SUMMARY_QUEUE = 'summary-queue';
+// export const SUMMARY_QUEUE = 'summary-queue';
 
 export const AppQueEvents = Object.freeze({
   Summary: {
