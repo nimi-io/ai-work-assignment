@@ -52,6 +52,8 @@ async function bootstrap() {
       },
       'x-workspace-id',
     )
+    .addSecurityRequirements('x-user-id')
+    .addSecurityRequirements('x-workspace-id')
     .build();
 
   SwaggerModule.setup(
