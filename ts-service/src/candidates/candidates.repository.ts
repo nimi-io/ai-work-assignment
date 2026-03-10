@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AbstractRepository } from '../../shared/common/abstract/abstract.service';
 import { Candidate } from './entities/candidate.entity';
+import { AbstractRepository } from '../shared/common/abstract/abstract.service';
 
 @Injectable()
 export class CandidatesRepository extends AbstractRepository<Candidate> {
