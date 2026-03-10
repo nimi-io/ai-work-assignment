@@ -4,7 +4,7 @@ import path from 'path';
 import { ConfigModuleOptions } from '@nestjs/config';
 
 // dotenvConfig({ path: path.resolve(__dirname, '../../../../.env') });
-
+dotenvConfig()
 interface DatabaseConfig {
   type: 'postgres';
   host: string;
@@ -75,7 +75,7 @@ const config = (): AppConfig => ({
           port: parseInt(process.env.DB_PORT ?? '5432', 10),
           username: process.env.DB_USER ?? 'postgres',
           password: process.env.DB_PASSWORD ?? 'postgres',
-          database: process.env.DB_NAME ?? 'ts_service_db',
+          database: process.env.DB_NAME ?? 'postgres',
           ssl: false,
           synchronize: true,
           logging: false,
