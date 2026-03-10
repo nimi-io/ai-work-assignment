@@ -3,10 +3,11 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { QueueService } from './queue.service';
 import { QueueProcessor } from './queue.processor';
-import { SUMMARY_QUEUE } from '../constants/index.constant';
+// import { SUMMARY_QUEUE } from '../constants/index.constant';
 import { SummariesModule } from 'src/summaries/summaries.module';
 import { CandidatesModule } from 'src/candidates/candidates.module';
 import { SummarizationModule } from 'src/summarization/summarization.module';
+import { AppQueEvents } from '../constants/index.constant';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { SummarizationModule } from 'src/summarization/summarization.module';
         },
       }),
     }),
-    BullModule.registerQueue({ name: SUMMARY_QUEUE }),
+    BullModule.registerQueue({ name: AppQueEvents.Summary.created }), // Register the queue with BullModule
   ],
   providers: [QueueService, QueueProcessor],
   exports: [QueueService],
