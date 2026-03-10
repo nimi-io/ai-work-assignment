@@ -13,6 +13,7 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
 import { SummarizationModule } from './summarization/summarization.module';
 import { AuthModule } from './auth/auth.module';
 import { FakeAuthGuard } from './auth/fake-auth.guard';
+import { QueueModule } from './shared/queue/queue.module';
 
 @Module({
   imports: [
@@ -20,19 +21,18 @@ import { FakeAuthGuard } from './auth/fake-auth.guard';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const db =
-          configService.get<
-            () => {
-              host: string;
-              port: number;
-              username: string;
-              password: string;
-              database: string;
-              ssl: boolean;
-              synchronize: boolean;
-              logging: boolean;
-            }
-          >('database')!();
+        const db = configService.get<
+          () => {
+            host: string;
+            port: number;
+            username: string;
+            password: string;
+            database: string;
+            ssl: boolean;
+            synchronize: boolean;
+            logging: boolean;
+          }
+        >('database')!();
         return {
           type: 'postgres' as const,
           host: db.host,
@@ -55,6 +55,7 @@ import { FakeAuthGuard } from './auth/fake-auth.guard';
     SummariesModule,
     WorkspacesModule,
     SummarizationModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: FakeAuthGuard }],
