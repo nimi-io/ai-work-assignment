@@ -1,6 +1,7 @@
 import path from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import appConfig from './index.config';
+import { ConfigService } from '@nestjs/config';
 
 const db = appConfig().database();
 

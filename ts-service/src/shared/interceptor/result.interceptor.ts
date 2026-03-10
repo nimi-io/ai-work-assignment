@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // result.interceptor.ts
 
 import {
@@ -8,14 +11,14 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import * as Sentry from '@sentry/node';
-
+// import * as Sentry from '@sentry/node';
+//
 @Injectable()
 export class ResultInterceptor<T> implements NestInterceptor<T, any> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data) => {
-        Sentry.captureException(data);
+        // Sentry.captureException(data);
         return {
           success: true,
           message: 'Success',
@@ -60,7 +63,7 @@ export class GlobalErrorInterceptor extends BaseExceptionFilter {
       'ExceptionFilter',
     );
 
-    Sentry.captureException(exception);
+    // Sentry.captureException(exception);
 
     response.status(status).json({
       success: false,

@@ -1,268 +1,174 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import {
-  DeepPartial,
-  DeleteResult,
-  EntityManager,
-  EntityTarget,
-  FindOptions,
-  FindManyOptions,
-  FindOneOptions,
+  Not,
+  IsNull,
   Repository,
-  SaveOptions,
-  RootFilterOperators,
-  QueryBuilder,
+  DeepPartial,
+  UpdateResult,
+  DeleteResult,
+  FindOneOptions,
+  FindManyOptions,
+  FindOptionsWhere,
 } from 'typeorm';
 import {
-  IDefaultOptions,
-  IGetMetaProps,
   IMeta,
+  IGetMetaProps,
   IPaginateResult,
-} from '../paginate-result.interface';
+  IDefaultPaginationOptions,
+} from './abstract.interface';
 
-@Injectable()
-export class AbstractService<T> {
-  protected constructor(
-    private readonly repository: Repository<T>,
-    private readonly entityClass: EntityTarget<T>,
-    protected readonly entityName?: string,
-  ) {}
-
-  protected DEFAULTOPTIONS: IDefaultOptions = { limit: 10, page: 1 };
-
-  protected getMeta({ total, data, limit, page }: IGetMetaProps): IMeta {
-    let meta: Partial<IMeta> = { totalItems: total, count: data?.length };
-    meta = { ...meta, itemsPerPage: limit, currentPage: page };
-    meta = { ...meta, totalPages: Math.ceil(total / limit) };
-    return meta as IMeta;
-  }
-
-  async findAll(
-    condition?: FindManyOptions<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T[]> {
-    return await this.repository.find(condition);
-  }
-
-  async create(
-    data: DeepPartial<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T> {
-    const newRecord = this.repository.create(data);
-    try {
-      return await this.repository.save(newRecord as DeepPartial<T>);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async save(
-    data: DeepPartial<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ) {
-    return await this.repository.save(data as DeepPartial<T>);
-  }
-  async createMany(
-    data: DeepPartial<T>[],
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T[]> {
-    const newRecords = this.repository.create(data);
-    return await this.repository.save(newRecords as DeepPartial<T[]>);
-  }
+export abstract class AbstractRepository<
+  TSchema extends { id: string; deletedAt?: Date; createdAt: Date },
+> {
+  constructor(readonly schemaModel: Repository<TSchema>) {}
 
   async findOne(
-    condition: FindOneOptions<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T> {
-    try {
-      return await this.repository.findOne(condition);
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException();
-    }
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    options?: FindOneOptions<TSchema>,
+  ): Promise<TSchema | null> {
+    return this.schemaModel.findOne({ where: schemaFilterQuery, ...options });
   }
 
-  async findOneOrFail(
-    condition: FindOneOptions<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T> {
-    return await this.repository.findOneOrFail(condition);
+  async findWithDeleted(id: string): Promise<TSchema | null> {
+    return this.schemaModel.findOne({
+      where: { id: id as unknown as any },
+      withDeleted: true,
+    });
   }
 
-  async findByIds(
-    condition: string[] | number[],
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T[]> {
-    return await this.repository.findByIds(condition);
-  }
-
-  async count(
-    condition: FindManyOptions<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<number> {
-    return await this.repository.count(condition);
+  async findWithRelations(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    relations: string[],
+  ): Promise<TSchema | null> {
+    return this.schemaModel.findOne({
+      where: schemaFilterQuery,
+      relations,
+    });
   }
 
   async find(
-    condition: FindManyOptions<T>, //| RootFilterOperators<T>,
-    options = this.DEFAULTOPTIONS,
-  ): Promise<IPaginateResult<T[]>> {
-    const { limit = 100, page = 1 } = options;
-    const query = { ...condition, take: limit, skip: (page - 1) * limit };
-    const [data, total] = await this.repository.findAndCount(query);
-    const meta = this.getMeta({ total, data, limit, page });
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    options?: FindManyOptions<TSchema>,
+  ): Promise<TSchema[]> {
+    return this.schemaModel.find({ where: schemaFilterQuery, ...options });
+  }
+
+  async findAllDeleted(): Promise<TSchema[]> {
+    return this.schemaModel.find({
+      where: { deletedAt: Not(IsNull()) } as FindOptionsWhere<TSchema>,
+    });
+  }
+
+  async create(createSchemaData: DeepPartial<TSchema>): Promise<TSchema> {
+    const entity = this.schemaModel.create(createSchemaData);
+
+    return this.schemaModel.save(entity);
+  }
+
+  async createMany(
+    createSchemaData: DeepPartial<TSchema>[],
+  ): Promise<TSchema[]> {
+    const entities = this.schemaModel.create(createSchemaData);
+    return this.schemaModel.save(entities);
+  }
+
+  async count(schemaFilterQuery: FindOptionsWhere<TSchema>): Promise<number> {
+    return this.schemaModel.count({ where: schemaFilterQuery });
+  }
+
+  async findAndPaginate(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    options: IDefaultPaginationOptions = this.DEFAULTPAGINATIONOPTIONS,
+    relations?: string[],
+  ): Promise<IPaginateResult<TSchema[] | null>> {
+    const [data, total] = await this.schemaModel.findAndCount({
+      where: schemaFilterQuery,
+      skip:
+        options.page && options.limit ? (options.page - 1) * options.limit : 0,
+      take: options.limit,
+      order: options.sort,
+      relations,
+      ...options,
+    });
+
+    const meta = this.getMeta({
+      total,
+      limit: options.limit,
+      page: options.page,
+    });
     return { data, meta };
   }
 
-  // async find(
-  //   condition: FindManyOptions<T>,
-  //   options: { limit?: number; page?: number } = this.DEFAULTOPTIONS,
-  // ): Promise<IPaginateResult<T[]>> {
-  //   const limit = options.limit ?? 10;
-  //   const page = options.page ?? 1;
-  //   //console.log(options)
-  //   const query = {
-  //     ...condition,
-  //     take: limit,
-  //     skip: (page - 1) * limit,
-  //   };
-  //   const [data, total] = await this.repository.findAndCount(query);
-  //   const meta = this.getMeta({ total, data, limit, page });
-  //   return { data, meta };
-  // }
+  async findOneAndUpdate(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    updateData: Partial<TSchema>,
+  ): Promise<TSchema | null> {
+    const entity = await this.schemaModel.findOne({ where: schemaFilterQuery });
+    if (!entity) return null;
+
+    Object.assign(entity, updateData);
+    return this.schemaModel.save(entity);
+  }
+
   async update(
-    id: any, // string | number,
-    data: DeepPartial<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T> {
-    const exists = await this.repository.findOne(id);
-    if (!exists)
-      throw new Error(`${this.entityName || 'Record'} Does Not Exist`);
-    return await this.repository.save({ id, ...exists, ...data });
+    id: string,
+    updateSchemaData: QueryDeepPartialEntity<TSchema>,
+  ): Promise<UpdateResult> {
+    return await this.schemaModel.update(id, updateSchemaData);
   }
 
-  async updateWhere(
-    condition: FindOneOptions<T>,
-    data: DeepPartial<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T> {
-    const exists = await this.repository.findOne(condition);
-    if (!exists)
-      throw new Error(`${this.entityName || 'Record'} Does Not Exist`);
-    return await this.repository.save({ ...exists, ...data });
+  async updateMany(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    updateData: QueryDeepPartialEntity<TSchema>,
+  ): Promise<UpdateResult> {
+    return this.schemaModel.update(schemaFilterQuery, updateData);
   }
 
-  async updateManyWhere(
-    condition: RootFilterOperators<T> | FindOneOptions<T>,
-    data: DeepPartial<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
-  ): Promise<T[]> {
-    const exists = await this.repository.find(
-      condition.where ? condition.where : condition,
-    );
-    if (!exists)
-      throw new Error(`${this.entityName || 'Record'} Does Not Exist`);
-    if (exists.length === 0) return exists;
-    const updateData = exists.map((item) => ({ ...item, ...data }));
-    return await this.repository.save(updateData);
-  }
-
-  async softRemove(
-    condition: FindOneOptions<T>,
-    saveOptions?: SaveOptions,
-    // @TransactionMan .ager() transactionManager?: EntityManager,
-  ): Promise<{ message: string }> {
-    const exists = await this.repository.findOne(condition);
-    if (!exists)
-      throw new Error(`${this.entityName || 'Record'} Does Not Exist`);
-    const record = this.repository.create(exists as DeepPartial<T>);
-    await this.repository.softRemove(record as DeepPartial<T>, saveOptions);
-    return { message: `${this.entityName || 'Record'} Deleted Successfully` };
-  }
-
-  async delete(
-    id: string | number | string[] | number[],
-    // @TransactionManager() transactionManager?: EntityManager,
+  async findOneAndDelete(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
   ): Promise<DeleteResult> {
-    return await this.repository.delete(id);
+    return this.schemaModel.delete(schemaFilterQuery);
   }
 
-  async deleteWhere(
-    condition: RootFilterOperators<T>,
-    // @TransactionManager() transactionManager?: EntityManager,
+  async delete(id: string): Promise<DeleteResult> {
+    return this.schemaModel.delete(id);
+  }
+
+  async deleteMany(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
   ): Promise<DeleteResult> {
-    const { where } = condition; // Assuming where is the deletion criteria
-
-    return await this.repository.delete(where);
+    return this.schemaModel.delete(schemaFilterQuery);
   }
 
-  async query(query: string, id: string): Promise<T[]> {
-    return await this.repository.query(query, [id]);
+  async increment(
+    schemaFilterQuery: FindOptionsWhere<TSchema>,
+    propertyPath: string,
+    value: number,
+  ): Promise<UpdateResult> {
+    return this.schemaModel.increment(schemaFilterQuery, propertyPath, value);
   }
-  async queryArr(query: string, id: string[]): Promise<T[]> {
-    return await this.repository.query(query, [...id]);
+
+  protected getMeta({ total, limit, page }: IGetMetaProps): IMeta {
+    const totalPages = Math.ceil(total / limit);
+    return {
+      total,
+      limit,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
   }
 
-  // async sqlQuery(query: string): Promise<T[]> {
-  //   return this.repository.query(query);
-  // }
-
-  // async beginTransaction(): Promise<EntityManager> {
-  //   return await this.repository.manager.transaction(
-  //     async (transactionManager) => {
-  //       return transactionManager;
-  //     },
-  //   );
-  // }
-
-  // async commitTransaction(): Promise<void> {
-  //   let queryRunner;
-  //   try {
-  //     queryRunner = this.repository.manager.connection.createQueryRunner();
-  //     await queryRunner.startTransaction();
-
-  //     // Your code inside the transaction
-
-  //     await queryRunner.commitTransaction();
-  //   } catch (error) {
-  //     // Handle transaction errors here
-  //     console.error('Error during transaction:', error);
-  //     await queryRunner.rollbackTransaction(); // Rollback on error
-  //     throw error; // Re-throw the error to propagate it
-  //   } finally {
-  //     await queryRunner.release(); // Release the query runner
-  //   }
-
-  //   return Promise.resolve(); // Explicitly return a Promise that resolves to void
-  // }
-  // async rollbackTransaction(): Promise<void> {
-  //   let queryRunner;
-
-  //   try {
-  //     const connection = this.repository.manager.connection; // Get the connection
-  //     queryRunner = connection.createQueryRunner();
-  //     await queryRunner.startTransaction();
-
-  //     // Your code inside the transaction
-
-  //     // ...
-  //   } catch (error) {
-  //     // Handle transaction errors here
-  //     console.error('Error during transaction:', error);
-  //     await queryRunner.rollbackTransaction(); // Rollback on error
-  //     throw error; // Re-throw the error to propagate it
-  //   } finally {
-  //     await queryRunner.release(); // Release the query runner
-  //   }
-
-  //   return Promise.resolve(); // Explicitly return a Promise that resolves to void
-  // }
-  // async isInTransaction(manager: EntityManager): Promise<boolean> {
-  //   const connection = manager.connection; // Get the connection
-  //   const queryRunner = connection.createQueryRunner(); // Create a query runner
-  //   const hasActiveQueryRunner = await queryRunner.hasActiveTransaction(); // Check for active transaction
-  //   await queryRunner.release(); // Release the query runner
-  //   return hasActiveQueryRunner;
-  // }
+  protected DEFAULTPAGINATIONOPTIONS: IDefaultPaginationOptions = {
+    limit: 10,
+    page: 1,
+    sort: { field: 'createdAt', order: 'desc' },
+    // relations?: [] as string[],
+  };
 }
