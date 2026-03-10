@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { config } from 'dotenv';
+import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
+import { ConfigModuleOptions } from '@nestjs/config';
 
-config({ path: path.resolve(__dirname, '.env') });
+dotenvConfig({ path: path.resolve(__dirname, '.env') });
 
 interface DatabaseConfig {
   type: 'postgres';
@@ -35,7 +36,7 @@ interface AppConfig {
   gemini: GeminiConfig;
 }
 
-export default (): AppConfig => ({
+const config = (): AppConfig => ({
   port: parseInt(process.env.PORT ?? '3000', 10) || 3000,
   app_env: process.env.ENV ?? 'development',
   secretKey: process.env.SECRET_KEY ?? 'secret',
@@ -98,3 +99,12 @@ export default (): AppConfig => ({
     model: process.env.GEMINI_MODEL ?? 'gemini-1.5-flash',
   },
 });
+
+export const configModuleOpts: ConfigModuleOptions = {
+  cache: false,
+  isGlobal: true,
+  load: [config],
+  // validationSchema: schema,
+};
+
+export default config;
