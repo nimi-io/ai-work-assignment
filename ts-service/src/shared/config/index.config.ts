@@ -3,7 +3,7 @@ import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
 import { ConfigModuleOptions } from '@nestjs/config';
 
-dotenvConfig({ path: path.resolve(__dirname, '../../../.env') });
+// dotenvConfig({ path: path.resolve(__dirname, '../../../../.env') });
 
 interface DatabaseConfig {
   type: 'postgres';
@@ -103,7 +103,7 @@ const config = (): AppConfig => ({
 export const configModuleOpts: ConfigModuleOptions = {
   cache: false,
   isGlobal: true,
-  envFilePath: '.env',
+  envFilePath: '../.env',
   load: [config],
 };
 

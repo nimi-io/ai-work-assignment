@@ -20,7 +20,7 @@ import {
   IGetMetaProps,
   IPaginateResult,
   IDefaultPaginationOptions,
-} from './abstract.interface';
+} from '../../interface/index.interface';
 
 export abstract class AbstractRepository<
   TSchema extends { id: string; deletedAt?: Date; createdAt: Date },

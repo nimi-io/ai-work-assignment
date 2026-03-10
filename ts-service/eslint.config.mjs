@@ -32,4 +32,13 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  // TypeORM decorator options type `enum` and `default` as `any` internally,
+  // which causes false-positive unsafe-access/assignment warnings on enum members.
+  {
+    files: ['**/*.entity.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+    },
+  },
 );
