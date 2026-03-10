@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -9,8 +10,8 @@ import {
 import {
   ICandidateDocument,
   DocumentType,
-} from '../../shared/interface/index.interface';
-import { Candidate } from '../../candidates/entities/candidate.entity';
+} from 'src/shared/interface/index.interface';
+import { Candidate } from 'src/candidates/entities/candidate.entity';
 
 @Entity('candidate_documents')
 @Index(['candidateId'])
@@ -39,6 +40,9 @@ export class CandidateDocument implements ICandidateDocument {
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   uploadedAt: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   // relations
   @ManyToOne(() => Candidate, (candidate) => candidate.documents, {
