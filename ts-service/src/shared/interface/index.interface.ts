@@ -110,5 +110,7 @@ export interface SummarizationResult {
 }
 
 export interface ISummarizationProvider {
-  generateCandidateSummary(input: SummarizationInput): Promise<SummarizationResult>;
+  generateCandidateSummary(
+    input: SummarizationInput,
+  ): Promise<SummarizationResult>;
 }
