@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-
 import { FakeAuthGuard } from './fake-auth.guard';
 
 @Module({

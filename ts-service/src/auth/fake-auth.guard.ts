@@ -4,15 +4,23 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-
 import { AuthUser } from './auth.types';
+import { IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()
 export class FakeAuthGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<Request>();
+  constructor(private readonly reflector: Reflector) {}
 
+  canActivate(context: ExecutionContext): boolean {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
+
+    const request = context.switchToHttp().getRequest<Request>();
     const userIdHeader = request.header('x-user-id');
     const workspaceIdHeader = request.header('x-workspace-id');
 
@@ -26,7 +34,6 @@ export class FakeAuthGuard implements CanActivate {
       userId: userIdHeader,
       workspaceId: workspaceIdHeader,
     };
-
     request.user = user;
     return true;
   }

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -36,14 +34,23 @@ async function bootstrap() {
     .setTitle('AeroIntelX API')
     .setDescription('The AeroIntelX API description')
     .setVersion('1.0')
-    .addBearerAuth(
+    .addApiKey(
       {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        description: 'Enter JWT token',
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-user-id',
+        description: 'User ID',
       },
-      'access-token',
+      'x-user-id',
+    )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-workspace-id',
+        description: 'Workspace ID',
+      },
+      'x-workspace-id',
     )
     .build();
 

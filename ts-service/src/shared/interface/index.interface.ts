@@ -10,17 +10,23 @@ export interface IDefaultOptions {
   page: number;
 }
 
+export interface IDefaultPaginationOptions {
+  limit: number;
+  page: number;
+  sort: Record<string, unknown>;
+}
+
 export interface IMeta {
-  totalItems: number;
-  count: number;
-  itemsPerPage: number;
+  total: number;
+  limit: number;
   currentPage: number;
   totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export interface IGetMetaProps {
   total: number;
-  data: unknown[];
   limit: number;
   page: number;
 }
