@@ -77,7 +77,7 @@ const config = (): AppConfig => ({
           password: process.env.DB_PASSWORD ?? 'postgres',
           database: process.env.DB_NAME ?? 'ts_service_db',
           ssl: false,
-          synchronize: false,
+          synchronize: true,
           logging: false,
         };
     }
