@@ -13,7 +13,7 @@ export interface IDefaultOptions {
 export interface IDefaultPaginationOptions {
   limit: number;
   page: number;
-  sort: Record<string, unknown>;
+  sort: Record<string, 'ASC' | 'DESC'>;
 }
 
 export interface IMeta {
