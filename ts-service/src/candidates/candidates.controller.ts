@@ -21,8 +21,14 @@ export class CandidatesController {
   @Post()
   @ApiOperation({ summary: 'Create a new candidate' })
   @ApiCreatedResponse({ description: 'Candidate created successfully' })
-  create(@Body() dto: CreateCandidateDto) {
-    return this.candidatesService.create(dto);
+  create(@Body() dto: CreateCandidateDto, @CurrentUser() user: AuthUser) {
+    console.log(
+      'Creating candidate with DTO:',
+      dto,
+      'for workspace:',
+      user.workspaceId,
+    );
+    return this.candidatesService.create({ ...dto, workspaceId: user.workspaceId });
   }
 
   @Get(':candidateId')
