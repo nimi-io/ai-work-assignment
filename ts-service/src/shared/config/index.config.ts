@@ -26,14 +26,21 @@ interface GeminiConfig {
   model: string;
 }
 
+interface OpenAiConfig {
+  apiKey: string;
+  model: string;
+}
+
 interface AppConfig {
   port: number;
   app_env: string;
   secretKey: string;
   secretKeyExp: string;
+  aiProvider: string;
   database: () => DatabaseConfig;
   redis: () => RedisConfig;
   gemini: GeminiConfig;
+  openai: OpenAiConfig;
 }
 
 const config = (): AppConfig => ({
@@ -41,6 +48,7 @@ const config = (): AppConfig => ({
   app_env: process.env.ENV ?? 'development',
   secretKey: process.env.SECRET_KEY ?? 'secret',
   secretKeyExp: process.env.SECRET_KEY_EXP ?? '24h',
+  aiProvider: (process.env.AI_PROVIDER ?? 'gemini').toLowerCase(),
 
   database: (): DatabaseConfig => {
     switch (process.env.ENV) {
@@ -97,6 +105,10 @@ const config = (): AppConfig => ({
   gemini: {
     apiKey: process.env.GEMINI_API_KEY ?? '',
     model: process.env.GEMINI_MODEL ?? 'gemini-1.5-flash',
+  },
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+    model: process.env.OPENAI_MODEL ?? 'gpt-4o',
   },
 });
 

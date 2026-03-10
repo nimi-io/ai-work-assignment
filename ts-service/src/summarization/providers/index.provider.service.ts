@@ -6,10 +6,11 @@ import {
   SummarizationResult,
 } from 'src/shared/interface/index.interface';
 import { GeminiProvider } from './gemini.provider';
+import { OpenAiProvider } from './openai.provider';
 
 export enum AiVendor {
   GEMINI = 'gemini',
-  // OPENAI = 'openai',
+  OPENAI = 'openai',
   // ANTHROPIC = 'anthropic',
 }
 
@@ -22,17 +23,18 @@ export class ProviderService implements OnModuleInit {
   constructor(
     private readonly configService: ConfigService,
     private readonly geminiProvider: GeminiProvider,
+    private readonly openAiProvider: OpenAiProvider,
     // Inject additional providers here as they are added:
-    // private readonly openAiProvider: OpenAiProvider,
+    // private readonly anthropicProvider: AnthropicProvider,
   ) {}
 
   onModuleInit() {
     this.registry.set(AiVendor.GEMINI, this.geminiProvider);
-    // this.registry.set(AiVendor.OPENAI, this.openAiProvider);
+    this.registry.set(AiVendor.OPENAI, this.openAiProvider);
+    // this.registry.set(AiVendor.ANTHROPIC, this.anthropicProvider);
 
     const configured = this.configService
-      .get<string>('AI_PROVIDER', AiVendor.GEMINI)
-      .toLowerCase() as AiVendor;
+      .get<string>('aiProvider', AiVendor.GEMINI) as AiVendor;
 
     if (!this.registry.has(configured)) {
       this.logger.warn(
