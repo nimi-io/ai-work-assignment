@@ -9,6 +9,7 @@ import {
   FindOneOptions,
   FindManyOptions,
   FindOptionsWhere,
+  FindOptionsOrder,
 } from 'typeorm';
 import {
   IMeta,
@@ -86,7 +87,7 @@ export abstract class AbstractRepository<
       skip:
         options.page && options.limit ? (options.page - 1) * options.limit : 0,
       take: options.limit,
-      order: options.sort,
+      order: options.sort as FindOptionsOrder<TSchema>,
       relations,
       ...options,
     });
@@ -163,7 +164,6 @@ export abstract class AbstractRepository<
   protected DEFAULTPAGINATIONOPTIONS: IDefaultPaginationOptions = {
     limit: 10,
     page: 1,
-    sort: { field: 'createdAt', order: 'desc' },
-    // relations?: [] as string[],
+    sort: { createdAt: 'DESC' },
   };
 }
