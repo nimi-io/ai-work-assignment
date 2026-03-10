@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { AppQueEvents, SUMMARY_QUEUE } from '../constants/index.constant';
+import { AppQueEvents } from '../constants/index.constant';
 import { SummariesRepository } from 'src/summaries/summaries.repository';
 import { CandidatesRepository } from 'src/candidates/candidates.repository';
 import { ProviderService } from 'src/summarization/providers/index.provider.service';
@@ -15,7 +15,7 @@ interface SummaryJobData {
   candidateId: string;
 }
 
-@Processor(SUMMARY_QUEUE)
+@Processor(AppQueEvents.Summary.created) // Listen to the specific queue for summary creation
 export class QueueProcessor extends WorkerHost {
   private readonly logger = new Logger(QueueProcessor.name);
 
@@ -44,6 +44,9 @@ export class QueueProcessor extends WorkerHost {
     candidateId,
   }: SummaryJobData): Promise<void> {
     try {
+      this.logger.debug(
+        `Generating summary for candidate ${candidateId} (summaryId=${summaryId})`,
+      );
       const candidate = await this.candidatesRepository.findWithRelations(
         { id: candidateId },
         ['documents'],
