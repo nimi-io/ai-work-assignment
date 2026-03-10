@@ -2,7 +2,10 @@ import { IsEmail, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCandidateDto {
-  @ApiProperty({ example: 'b1e7c2d0-…', description: 'ID of the workspace this candidate belongs to' })
+  @ApiProperty({
+    example: 'b1e7c2d0-…',
+    description: 'ID of the workspace this candidate belongs to',
+  })
   @IsUUID()
   @IsNotEmpty()
   workspaceId: string;
@@ -17,7 +20,10 @@ export class CreateCandidateDto {
   @IsNotEmpty()
   lastName: string;
 
-  @ApiProperty({ example: 'jane.doe@example.com', description: "Candidate's email address" })
+  @ApiProperty({
+    example: 'jane.doe@example.com',
+    description: "Candidate's email address",
+  })
   @IsEmail()
   @IsNotEmpty()
   email: string;

@@ -30,7 +30,9 @@ export class CandidatesController {
   @ApiParam({ name: 'candidateId', description: 'UUID of the candidate' })
   @ApiOkResponse({ description: 'Candidate found' })
   @ApiNotFoundResponse({ description: 'Candidate not found' })
-  @ApiForbiddenResponse({ description: 'Candidate does not belong to this workspace' })
+  @ApiForbiddenResponse({
+    description: 'Candidate does not belong to this workspace',
+  })
   findOne(
     @Param('candidateId') candidateId: string,
     @CurrentUser() user: AuthUser,

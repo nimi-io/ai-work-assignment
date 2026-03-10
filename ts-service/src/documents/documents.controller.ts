@@ -22,7 +22,9 @@ export class DocumentsController {
   @ApiParam({ name: 'candidateId', description: 'UUID of the candidate' })
   @ApiCreatedResponse({ description: 'Document record created successfully' })
   @ApiNotFoundResponse({ description: 'Candidate not found' })
-  @ApiForbiddenResponse({ description: 'Candidate does not belong to this workspace' })
+  @ApiForbiddenResponse({
+    description: 'Candidate does not belong to this workspace',
+  })
   create(
     @Param('candidateId') candidateId: string,
     @Body() dto: CreateDocumentDto,
