@@ -60,7 +60,8 @@ export class GeminiProvider implements ISummarizationProvider {
         throw new Error('Gemini returned an empty response');
       }
     } catch (err) {
-      this.logger.error(`Gemini API call failed: ${err.message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Gemini API call failed: ${message}`);
       throw err;
     }
 

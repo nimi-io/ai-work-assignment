@@ -4,7 +4,7 @@ import path from 'path';
 import { ConfigModuleOptions } from '@nestjs/config';
 
 // dotenvConfig({ path: path.resolve(__dirname, '../../../../.env') });
-dotenvConfig()
+dotenvConfig();
 interface DatabaseConfig {
   type: 'postgres';
   host: string;

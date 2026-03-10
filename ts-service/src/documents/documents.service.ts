@@ -1,26 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CreateDocumentDto } from './dto/create-document.dto';
-import { UpdateDocumentDto } from './dto/update-document.dto';
+import { DocumentsRepository } from './documents.repository';
+import { CandidatesRepository } from '../candidates/candidates.repository';
+import { CandidateDocument } from './entities/document.entity';
 
 @Injectable()
 export class DocumentsService {
-  create(createDocumentDto: CreateDocumentDto) {
-    return 'This action adds a new document';
-  }
+  constructor(
+    private readonly documentsRepository: DocumentsRepository,
+    private readonly candidatesRepository: CandidatesRepository,
+  ) {}
 
-  findAll() {
-    return `This action returns all documents`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} document`;
-  }
-
-  update(id: number, updateDocumentDto: UpdateDocumentDto) {
-    return `This action updates a #${id} document`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} document`;
+  async create(
+    candidateId: string,
+    dto: CreateDocumentDto,
+    workspaceId: string,
+  ): Promise<CandidateDocument> {
+    const candidate = await this.candidatesRepository.findOne({
+      id: candidateId,
+    });
+    if (!candidate) throw new NotFoundException('Candidate not found');
+    if (candidate.workspaceId !== workspaceId) {
+      throw new ForbiddenException(
+        'Candidate does not belong to this workspace',
+      );
+    }
+    return this.documentsRepository.create({ ...dto, candidateId });
   }
 }

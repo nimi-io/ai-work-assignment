@@ -59,7 +59,8 @@ export class OpenAiProvider implements ISummarizationProvider {
         throw new Error('OpenAI returned an empty response');
       }
     } catch (err) {
-      this.logger.error(`OpenAI API call failed: ${err.message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`OpenAI API call failed: ${message}`);
       throw err;
     }
 

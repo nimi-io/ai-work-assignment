@@ -33,8 +33,10 @@ export class ProviderService implements OnModuleInit {
     this.registry.set(AiVendor.OPENAI, this.openAiProvider);
     // this.registry.set(AiVendor.ANTHROPIC, this.anthropicProvider);
 
-    const configured = this.configService
-      .get<string>('aiProvider', AiVendor.GEMINI) as AiVendor;
+    const configured = this.configService.get<string>(
+      'aiProvider',
+      AiVendor.GEMINI,
+    ) as AiVendor;
 
     if (!this.registry.has(configured)) {
       this.logger.warn(
@@ -52,7 +54,9 @@ export class ProviderService implements OnModuleInit {
     const key = vendor ?? this.activeVendor;
     const provider = this.registry.get(key);
     if (!provider) {
-      throw new Error(`No summarization provider registered for vendor "${key}"`);
+      throw new Error(
+        `No summarization provider registered for vendor "${key}"`,
+      );
     }
     return provider;
   }
