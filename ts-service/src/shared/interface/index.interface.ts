@@ -1,5 +1,3 @@
-// ─── Pagination ──────────────────────────────────────────────────────────────
-
 export interface IPaginateResult<T> {
   data: T;
   meta: IMeta;
@@ -31,16 +29,12 @@ export interface IGetMetaProps {
   page: number;
 }
 
-// ─── Workspace ───────────────────────────────────────────────────────────────
-
 export interface IWorkspace {
   id: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
 }
-
-// ─── Candidate ───────────────────────────────────────────────────────────────
 
 export interface ICandidate {
   id: string;
@@ -51,8 +45,6 @@ export interface ICandidate {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// ─── Document ────────────────────────────────────────────────────────────────
 
 export enum DocumentType {
   RESUME = 'resume',
@@ -68,9 +60,8 @@ export interface ICandidateDocument {
   storageKey: string;
   rawText: string;
   uploadedAt: Date;
+  createdAt: Date;
 }
-
-// ─── Summary ─────────────────────────────────────────────────────────────────
 
 export enum SummaryStatus {
   PENDING = 'pending',
@@ -99,8 +90,6 @@ export interface ICandidateSummary {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// ─── Summarization Provider ──────────────────────────────────────────────────
 
 export interface SummarizationInput {
   candidateId: string;
