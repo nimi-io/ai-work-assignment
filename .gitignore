@@ -66,4 +66,4 @@ Thumbs.db
 
 # Service folders (local dev artifacts)
 python-service/.venv/
-typescript-service/node_modules/
+ts-service/node_modules/
